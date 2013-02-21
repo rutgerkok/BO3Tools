@@ -75,10 +75,17 @@ public class BO3CreateCommand implements CommandExecutor {
         int bo3CenterX = (start.getBlockX() + end.getBlockX()) / 2;
         int bo3CenterY = start.getBlockY();
         int bo3CenterZ = (start.getBlockZ() + end.getBlockZ()) / 2;
-        if (player.hasMetadata(BO3Tools.BO3_CENTER_X)) {
-            bo3CenterX = player.getMetadata(BO3Tools.BO3_CENTER_X).get(0).asInt();
-            bo3CenterY = player.getMetadata(BO3Tools.BO3_CENTER_Y).get(0).asInt();
-            bo3CenterZ = player.getMetadata(BO3Tools.BO3_CENTER_Z).get(0).asInt();
+        if (plugin.getMetadata(player, BO3Tools.BO3_CENTER_X) != null) {
+            int selectedBo3CenterX = plugin.getMetadata(player, BO3Tools.BO3_CENTER_X);
+            int selectedBo3CenterY = plugin.getMetadata(player, BO3Tools.BO3_CENTER_Y);
+            int selectedBo3CenterZ = plugin.getMetadata(player, BO3Tools.BO3_CENTER_Z);
+            if (MathHelper.abs(bo3CenterX - selectedBo3CenterX) > 32 || MathHelper.abs(bo3CenterZ - selectedBo3CenterZ) > 32) {
+                player.sendMessage(BaseCommand.ERROR_COLOR + "Selected BO3 center is too far away.");
+                return true;
+            }
+            bo3CenterX = selectedBo3CenterX;
+            bo3CenterY = selectedBo3CenterY;
+            bo3CenterZ = selectedBo3CenterZ;
             player.removeMetadata(BO3Tools.BO3_CENTER_X, plugin);
         }
 
