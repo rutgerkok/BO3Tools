@@ -1,6 +1,6 @@
 name: BO3Tools
 main: nl.rutgerkok.bo3tools.BO3Tools
-version: 1.0
+version: 1.1
 authors: ["Rutger Kok"]
 depends: ["TerrainControl", "WorldEdit"]
 description: Bukkit plugin to help you working with the BO3 objects.
@@ -18,7 +18,7 @@ permissions:
 commands:
   exportbo3:
     description: "Export a WorldEdit selection to a BO3, (optionally) ignoring all air blocks."
-    usage: "/<command> <bo3name> [--includeair]"
+    usage: "/<command> <bo3name> [--includeair] [--includetileentities]"
     aliases: [export]
     permission: bo3tools.exportbo3
   convertbo2:
