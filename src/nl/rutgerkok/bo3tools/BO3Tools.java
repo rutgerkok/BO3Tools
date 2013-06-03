@@ -2,44 +2,52 @@ package nl.rutgerkok.bo3tools;
 
 import java.util.logging.Logger;
 
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
+import nl.rutgerkok.bo3tools.util.PlayerDataCache;
+
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class BO3Tools extends JavaPlugin {
-    public static final String BO3_CENTER_X = "bo3toolscenterx";
-    public static final String BO3_CENTER_Y = "bo3toolscentery";
-    public static final String BO3_CENTER_Z = "bo3toolscenterz";
+    public static final int MAX_DISTANCE = 32;
+    public static final int MAX_DISTANCE_SQUARED = MAX_DISTANCE * MAX_DISTANCE;
 
-    public void onEnable() {
-        getCommand("exportbo3").setExecutor(new BO3CreateCommand(this));
-        getCommand("convertbo2").setExecutor(new BO2ConvertCommand(this));
-        getServer().getPluginManager().registerEvents(new BO3CenterCreator(this), this);
+    private PlayerDataCache<NextBO3Data> playerDataCache;
+
+    /**
+     * Gets the data for the next BO3 of the player. If there is no data yet, it
+     * will be created.
+     * 
+     * @param player
+     *            The player.
+     * @return The data for the next BO3.
+     */
+    public NextBO3Data getNextBO3Data(Player player) {
+        NextBO3Data data = playerDataCache.get(player);
+        if (data == null) {
+            // No data yet, create
+            data = new NextBO3Data();
+            playerDataCache.set(player, data);
+        }
+        return data;
     }
 
     public void log(String string) {
         Logger.getLogger("Minecraft").info("[" + getDescription().getName() + "] " + string);
     }
 
-    // Metadata helpers
+    public void onEnable() {
+        getCommand("exportbo3").setExecutor(new BO3CreateCommand(this));
+        getCommand("convertbo2").setExecutor(new BO2ConvertCommand(this));
+        getServer().getPluginManager().registerEvents(new BO3CenterCreator(this), this);
 
-    @SuppressWarnings("unchecked")
-    public <T> T getMetadata(Metadatable lookup, String key) {
-        for (MetadataValue value : lookup.getMetadata(key)) {
-            if (value.getOwningPlugin().equals(this)) {
-                return (T) value.value();
+        // Initialize data cache
+        this.playerDataCache = new PlayerDataCache<NextBO3Data>(0);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                playerDataCache.hearthBeat();
             }
-        }
-        return null;
-    }
-
-    public void setMetadata(Metadatable lookup, String key, Object value) {
-        lookup.removeMetadata(key, this);
-        lookup.setMetadata(key, new FixedMetadataValue(this, value));
-    }
-
-    public void removeMetadata(Metadatable lookup, String key) {
-        lookup.removeMetadata(key, this);
+        }.runTaskTimer(this, 20 * 60 * 2, 20 * 60 * 2);
     }
 }

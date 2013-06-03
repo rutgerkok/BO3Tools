@@ -1,5 +1,7 @@
 package nl.rutgerkok.bo3tools;
 
+import nl.rutgerkok.bo3tools.util.BlockLocation;
+
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -27,9 +29,7 @@ public class BO3CenterCreator implements Listener {
             if (inHand != null && inHand.getType().equals(Material.WOOD_HOE)) {
                 if (player.hasPermission("bo3tools.exportbo3")) {
                     Block clicked = event.getClickedBlock();
-                    plugin.setMetadata(player, BO3Tools.BO3_CENTER_X, clicked.getX());
-                    plugin.setMetadata(player, BO3Tools.BO3_CENTER_Y, clicked.getY());
-                    plugin.setMetadata(player, BO3Tools.BO3_CENTER_Z, clicked.getZ());
+                    plugin.getNextBO3Data(player).setCenter(BlockLocation.toBlockLocation(clicked));
                     player.sendMessage(BaseCommand.MESSAGE_COLOR + "Selected this block as the center of the next BO3 object created using /exportbo3.");
                     event.setCancelled(true);
                 }
