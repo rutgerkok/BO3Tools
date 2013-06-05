@@ -1,5 +1,6 @@
 package nl.rutgerkok.bo3tools;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -136,5 +137,13 @@ public class NextBO3Data {
      */
     public void setCenter(BlockLocation center) {
         this.center = center;
+    }
+    
+    /**
+     * Gets all block checks. Set cannot be modified.
+     * @return All block checks.
+     */
+    public Set<BlockLocation> getBlockChecks() {
+        return Collections.unmodifiableSet(blockChecks);
     }
 }

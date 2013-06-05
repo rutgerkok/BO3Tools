@@ -39,7 +39,7 @@ public class BO3Tools extends JavaPlugin {
     public void onEnable() {
         getCommand("exportbo3").setExecutor(new BO3CreateCommand(this));
         getCommand("convertbo2").setExecutor(new BO2ConvertCommand(this));
-        getServer().getPluginManager().registerEvents(new BO3CenterCreator(this), this);
+        getServer().getPluginManager().registerEvents(new BO3ClickHandler(this), this);
 
         // Initialize data cache
         playerDataCache = new PlayerDataCache<NextBO3Data>(0);

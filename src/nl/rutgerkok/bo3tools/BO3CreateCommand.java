@@ -1,21 +1,14 @@
 package nl.rutgerkok.bo3tools;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import nl.rutgerkok.bo3tools.util.BlockLocation;
 import nl.rutgerkok.bo3tools.util.InvalidBO3Exception;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -24,11 +17,7 @@ import org.bukkit.entity.Player;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
-import com.khorn.terraincontrol.configuration.Tag;
-import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
-import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
-import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
@@ -42,16 +31,6 @@ public class BO3CreateCommand implements TabExecutor {
 
     public BO3CreateCommand(BO3Tools plugin) {
         this.plugin = plugin;
-    }
-
-    private String getTileEntityName(Tag tag) {
-        Tag[] values = (Tag[]) tag.getValue();
-        for (Tag childTag : values) {
-            if (childTag.getName().equals("id")) {
-                return (String) childTag.getValue();
-            }
-        }
-        return "Unknown";
     }
 
     @Override
@@ -72,7 +51,6 @@ public class BO3CreateCommand implements TabExecutor {
         World world = player.getWorld();
         LocalWorld worldTC = TerrainControl.getWorld(world.getName());
         String bo3Name = "we-" + args[0];
-        int tileEntityCount = 1;
 
         // Get the selection
         WorldEditPlugin worldEdit = (WorldEditPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
@@ -81,8 +59,7 @@ public class BO3CreateCommand implements TabExecutor {
             player.sendMessage(BaseCommand.ERROR_COLOR + "No WorldEdit selection found.");
             return true;
         }
-        Location start = selection.getMinimumPoint();
-        Location end = selection.getMaximumPoint();
+
         List<String> argsList = Arrays.asList(args);
 
         // Some command parameters
@@ -105,80 +82,21 @@ public class BO3CreateCommand implements TabExecutor {
         }
 
         // Create the BO3 file
-        File bo3File = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), bo3Name + ".bo3");
-        File tileEntitiesFolder = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), bo3Name);
+        BO3Creator creator = BO3Creator.name(bo3Name).author(player).center(nextBO3data.getCenter(selection)).selection(selection);
+        creator.blockChecks(nextBO3data.getBlockChecks());
+        if (includeAir) {
+            creator.includeAir();
+        }
         if (includeTileEntities) {
-            tileEntitiesFolder.mkdirs();
+            creator.includeTileEntities(worldTC);
         }
-        BO3 bo3 = new BO3(bo3Name, bo3File);
-        bo3.onEnable(Collections.<String, CustomObject> emptyMap());
-
-        // Get the center
-        BlockLocation bo3Center = nextBO3data.getCenter(selection);
-
-        // Make a list of all the blocks
-        List<BlockFunction> blocks = new ArrayList<BlockFunction>(selection.getWidth() * selection.getHeight() * selection.getLength());
-        for (int x = start.getBlockX(); x <= end.getBlockX(); x++) {
-            for (int y = start.getBlockY(); y <= end.getBlockY(); y++) {
-                for (int z = start.getBlockZ(); z <= end.getBlockZ(); z++) {
-                    Block block = world.getBlockAt(x, y, z);
-                    int id = block.getTypeId();
-                    byte data = block.getData();
-                    if (includeAir || id != 0) {
-                        BlockFunction blockFunction = new BlockFunction();
-                        blockFunction.blockId = id;
-                        blockFunction.blockData = data;
-                        blockFunction.x = x - bo3Center.getX();
-                        blockFunction.y = y - bo3Center.getY();
-                        blockFunction.z = z - bo3Center.getZ();
-
-                        if (includeTileEntities) {
-                            // Look for tile entities
-                            Tag tag = worldTC.getMetadata(x, y, z);
-                            if (tag != null) {
-                                String tileEntityName = tileEntityCount + "-" + getTileEntityName(tag) + ".nbt";
-                                File tileEntityFile = new File(tileEntitiesFolder, tileEntityName);
-
-                                tileEntityCount++;
-                                try {
-                                    tileEntityFile.createNewFile();
-                                    FileOutputStream fos = new FileOutputStream(tileEntityFile);
-                                    tag.writeTo(fos);
-                                    fos.flush();
-                                    fos.close();
-                                    blockFunction.hasMetaData = true;
-                                    blockFunction.metaDataTag = tag;
-                                    blockFunction.metaDataName = bo3Name + "/" + tileEntityName;
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-
-                        }
-
-                        blockFunction.setValid(true);
-                        blocks.add(blockFunction);
-                    }
-                }
-            }
-        }
-
-        // Add the blocks to the BO3
-        bo3.getSettings().blocks[0] = blocks.toArray(new BlockFunction[0]);
-
-        // Add player name to the BO3
-        bo3.getSettings().author = player.getName();
-
-        // Don't save it every TC startup
-        bo3.getSettings().settingsMode = ConfigMode.WriteDisable;
-
-        // Save the BO3
-        bo3.getSettings().writeSettingsFile(bo3File, true);
+        BO3 bo3 = creator.create();
 
         // Send message
-        player.sendMessage(BaseCommand.MESSAGE_COLOR + "Created a new BO3 file with " + blocks.size() + " blocks");
-        plugin.log(sender.getName() + " created the BO3 " + bo3.getName() + " consisting of " + blocks.size() + " blocks");
-        
+        int size = bo3.getSettings().blocks[0].length;
+        player.sendMessage(BaseCommand.MESSAGE_COLOR + "Created a new BO3 file with " + size + " blocks");
+        plugin.log(sender.getName() + " created the BO3 " + bo3.getName() + " consisting of " + size + " blocks");
+
         // Remove NextBO3Data
         plugin.removeNextBO3Data(player);
 
