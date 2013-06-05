@@ -178,6 +178,9 @@ public class BO3CreateCommand implements TabExecutor {
         // Send message
         player.sendMessage(BaseCommand.MESSAGE_COLOR + "Created a new BO3 file with " + blocks.size() + " blocks");
         plugin.log(sender.getName() + " created the BO3 " + bo3.getName() + " consisting of " + blocks.size() + " blocks");
+        
+        // Remove NextBO3Data
+        plugin.removeNextBO3Data(player);
 
         return true;
     }

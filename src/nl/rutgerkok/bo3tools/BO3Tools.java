@@ -42,12 +42,23 @@ public class BO3Tools extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BO3CenterCreator(this), this);
 
         // Initialize data cache
-        this.playerDataCache = new PlayerDataCache<NextBO3Data>(0);
+        playerDataCache = new PlayerDataCache<NextBO3Data>(0);
         new BukkitRunnable() {
             @Override
             public void run() {
                 playerDataCache.hearthBeat();
             }
         }.runTaskTimer(this, 20 * 60 * 2, 20 * 60 * 2);
+    }
+
+    /**
+     * Removes the data for the next BO3. Call this after a BO3 has been
+     * created.
+     * 
+     * @param player
+     *            The affected player.
+     */
+    public void removeNextBO3Data(Player player) {
+        playerDataCache.remove(player);
     }
 }

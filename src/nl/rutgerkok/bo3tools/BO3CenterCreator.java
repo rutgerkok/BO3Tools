@@ -29,8 +29,12 @@ public class BO3CenterCreator implements Listener {
             if (inHand != null && inHand.getType().equals(Material.WOOD_HOE)) {
                 if (player.hasPermission("bo3tools.exportbo3")) {
                     Block clicked = event.getClickedBlock();
-                    plugin.getNextBO3Data(player).setCenter(BlockLocation.toBlockLocation(clicked));
+                    NextBO3Data data = plugin.getNextBO3Data(player);
+                    data.setCenter(BlockLocation.toBlockLocation(clicked));
                     player.sendMessage(BaseCommand.MESSAGE_COLOR + "Selected this block as the center of the next BO3 object created using /exportbo3.");
+                    if (data.removeAllBlockChecks()) {
+                        player.sendMessage(BaseCommand.MESSAGE_COLOR + "All previously selected block checks have been removed.");
+                    }
                     event.setCancelled(true);
                 }
             }

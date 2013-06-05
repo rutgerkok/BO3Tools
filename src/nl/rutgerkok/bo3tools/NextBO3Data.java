@@ -116,6 +116,19 @@ public class NextBO3Data {
     }
 
     /**
+     * Removes all block checks, if any.
+     * 
+     * @return If there were previously no block checks, this will return false.
+     */
+    public boolean removeAllBlockChecks() {
+        if (blockChecks.size() > 0) {
+            blockChecks.clear();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Sets the center of the next BO3.
      * 
      * @param center
