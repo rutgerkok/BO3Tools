@@ -44,6 +44,7 @@ public class BO3Creator {
     private LocalWorld worldTC;
     private Set<BlockLocation> blockChecks;
     private boolean hasLeaves;
+    private boolean noLeavesFix;
 
     private BO3Creator(String name) {
         this.name = name;
@@ -136,6 +137,11 @@ public class BO3Creator {
         return this;
     }
 
+    public BO3Creator noLeavesFix() {
+        this.noLeavesFix = true;
+        return this;
+    }
+
     /**
      * Creates the BO3 with the given settings. BO3 is automatically saved.
      * 
@@ -199,14 +205,10 @@ public class BO3Creator {
                     if (includeAir || id != 0) {
                         BlockFunction blockFunction = new BlockFunction();
                         blockFunction.blockId = id;
-                        blockFunction.blockData = data;
+                        blockFunction.blockData = filterData(id, data);
                         blockFunction.x = x - center.getX();
                         blockFunction.y = y - center.getY();
                         blockFunction.z = z - center.getZ();
-
-                        if (!hasLeaves && id == DefaultMaterial.LEAVES.id) {
-                            hasLeaves = true;
-                        }
 
                         if (includeTileEntities) {
                             // Look for tile entities
@@ -239,6 +241,18 @@ public class BO3Creator {
             }
         }
         return blocks;
+    }
+
+    private byte filterData(int blockId, byte blockData) {
+        if (blockId == DefaultMaterial.LEAVES.id) {
+            // Leaves detected
+            hasLeaves = true;
+            if (!noLeavesFix) {
+                // Clear no-leave-decay flag
+                return (byte) (blockData % 4);
+            }
+        }
+        return blockData;
     }
 
     private List<BlockCheck> createBlockChecks() {

@@ -14,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import com.google.common.collect.Lists;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
@@ -22,10 +23,11 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
 public class BO3CreateCommand implements TabExecutor {
-    public static final List<String> AUTO_COMPLETE_OPTIONS = Arrays.asList(new String[] { "--includeair", "--includetileentities" });
+    public static final List<String> AUTO_COMPLETE_OPTIONS = Lists.newArrayList("--includeair", "--includetileentities" , "--noleavesfix");
 
     public static final String INCLUDE_AIR = AUTO_COMPLETE_OPTIONS.get(0);
     public static final String INCLUDE_TILE_ENTITIES = AUTO_COMPLETE_OPTIONS.get(1);
+    public static final String NO_LEAVES_FIX = AUTO_COMPLETE_OPTIONS.get(2);
 
     private BO3Tools plugin;
 
@@ -65,6 +67,7 @@ public class BO3CreateCommand implements TabExecutor {
         // Some command parameters
         boolean includeAir = argsList.contains(INCLUDE_AIR);
         boolean includeTileEntities = argsList.contains(INCLUDE_TILE_ENTITIES);
+        boolean noLeavesFix = argsList.contains(NO_LEAVES_FIX);
         if (includeTileEntities && worldTC == null) {
             player.sendMessage(ChatColor.RED + "Terrain Control needs to be enabled for this world to save TileEntities.");
             return true;
@@ -89,6 +92,9 @@ public class BO3CreateCommand implements TabExecutor {
         }
         if (includeTileEntities) {
             creator.includeTileEntities(worldTC);
+        }
+        if(noLeavesFix) {
+            creator.noLeavesFix();
         }
         BO3 bo3 = creator.create();
 
