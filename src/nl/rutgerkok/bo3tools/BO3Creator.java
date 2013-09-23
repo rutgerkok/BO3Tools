@@ -178,12 +178,12 @@ public class BO3Creator {
         bo3.getSettings().settingsMode = ConfigMode.WriteDisable;
 
         // Save the BO3
-        bo3.getSettings().writeSettingsFile(bo3File, true);
+        bo3.getSettings().writeSettingsFile(true);
 
         return bo3;
     }
 
-    private List<BlockFunction> createBlocks() {
+	private List<BlockFunction> createBlocks() {
         File tileEntitiesFolder = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), name);
         if (includeTileEntities) {
             tileEntitiesFolder.mkdirs();
