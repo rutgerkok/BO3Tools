@@ -19,7 +19,7 @@ permissions:
 commands:
   exportbo3:
     description: "Export a WorldEdit selection to a BO3, (optionally) ignoring all air blocks."
-    usage: "/<command> <bo3name> [--includeair] [--includetileentities]"
+    usage: "/<command> <bo3name> [--includeair] [--includetileentities] [--noleavesfix]"
     aliases: [export]
     permission: bo3tools.exportbo3
   convertbo2:
