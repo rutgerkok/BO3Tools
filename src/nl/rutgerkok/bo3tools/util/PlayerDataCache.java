@@ -36,6 +36,7 @@ public class PlayerDataCache<T> {
             this.data = data;
         }
     }
+
     private final Map<String, DataEntry> data;
 
     private final long timeToLive;

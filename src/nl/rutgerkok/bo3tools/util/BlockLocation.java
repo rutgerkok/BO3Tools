@@ -24,6 +24,7 @@ public class BlockLocation {
         }
         return workLocation;
     }
+
     /**
      * Gets the BlockLocation of the block. Can only be used from the main
      * thread.
@@ -35,6 +36,7 @@ public class BlockLocation {
     public static BlockLocation toBlockLocation(Block block) {
         return new BlockLocation(block.getWorld(), block.getX(), block.getY(), block.getZ());
     }
+
     /**
      * Gets the BlockLocation of the entity. Doesn't create additional Location
      * instances. Can only be used from the main thread.
@@ -47,6 +49,7 @@ public class BlockLocation {
         Location location = entity.getLocation(getWorkLocation());
         return new BlockLocation(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
+
     private final String world;
 
     private final int x;

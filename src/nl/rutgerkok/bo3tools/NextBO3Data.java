@@ -138,9 +138,10 @@ public class NextBO3Data {
     public void setCenter(BlockLocation center) {
         this.center = center;
     }
-    
+
     /**
      * Gets all block checks. Set cannot be modified.
+     * 
      * @return All block checks.
      */
     public Set<BlockLocation> getBlockChecks() {

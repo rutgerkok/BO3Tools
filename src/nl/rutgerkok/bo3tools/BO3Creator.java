@@ -183,7 +183,7 @@ public class BO3Creator {
         return bo3;
     }
 
-	private List<BlockFunction> createBlocks() {
+    private List<BlockFunction> createBlocks() {
         File tileEntitiesFolder = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), name);
         if (includeTileEntities) {
             tileEntitiesFolder.mkdirs();
