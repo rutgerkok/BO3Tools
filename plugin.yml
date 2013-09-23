@@ -11,6 +11,7 @@ permissions:
     children:
       bo3tools.exportbo3: true
       bo3tools.convertbo2: true
+      bo3tools.convertallbo2: true
   bo3tools.exportbo3:
     description: Export your WorldEdit selection as a BO3.
   bo3tools.convertbo2:
@@ -25,3 +26,11 @@ commands:
     description: "Convert a BO2 object to a BO3 object."
     usage: "/<command> <bo2name>"
     permission: bo3tools.convertbo2
+  convertallbo2:
+    description: "Converts all BO2 objects in the folder to BO3 objects."
+    usage: "/<command> <GlobalObjects | WorldObjects [world=currentWorld]>"
+    permission: bo3tools.convertall
+  bo2test:
+    description: "test command"
+    usage: "/testcommand <args>"
+    permission: bo3tools.test
