@@ -1,13 +1,15 @@
-package nl.rutgerkok.bo3tools;
+package nl.rutgerkok.bo3tools.command;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import nl.rutgerkok.bo3tools.BO3Creator;
+import nl.rutgerkok.bo3tools.BO3Tools;
+import nl.rutgerkok.bo3tools.NextBO3Data;
 import nl.rutgerkok.bo3tools.util.InvalidBO3Exception;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -23,7 +25,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
 public class BO3CreateCommand implements TabExecutor {
-    public static final List<String> AUTO_COMPLETE_OPTIONS = Lists.newArrayList("--includeair", "--includetileentities" , "--noleavesfix");
+    public static final List<String> AUTO_COMPLETE_OPTIONS = Lists.newArrayList("--includeair", "--includetileentities", "--noleavesfix");
 
     public static final String INCLUDE_AIR = AUTO_COMPLETE_OPTIONS.get(0);
     public static final String INCLUDE_TILE_ENTITIES = AUTO_COMPLETE_OPTIONS.get(1);
@@ -69,7 +71,7 @@ public class BO3CreateCommand implements TabExecutor {
         boolean includeTileEntities = argsList.contains(INCLUDE_TILE_ENTITIES);
         boolean noLeavesFix = argsList.contains(NO_LEAVES_FIX);
         if (includeTileEntities && worldTC == null) {
-            player.sendMessage(ChatColor.RED + "Terrain Control needs to be enabled for this world to save TileEntities.");
+            player.sendMessage(BaseCommand.ERROR_COLOR + "Terrain Control needs to be enabled for this world to save TileEntities.");
             return true;
         }
 
@@ -80,7 +82,7 @@ public class BO3CreateCommand implements TabExecutor {
         try {
             nextBO3data.checkBO3Valid(selection);
         } catch (InvalidBO3Exception e) {
-            player.sendMessage(ChatColor.RED + "Invalid BO3: " + e.getMessage());
+            player.sendMessage(BaseCommand.ERROR_COLOR + "Invalid BO3: " + e.getMessage());
             return true;
         }
 
@@ -93,7 +95,7 @@ public class BO3CreateCommand implements TabExecutor {
         if (includeTileEntities) {
             creator.includeTileEntities(worldTC);
         }
-        if(noLeavesFix) {
+        if (noLeavesFix) {
             creator.noLeavesFix();
         }
         BO3 bo3 = creator.create();

@@ -2,8 +2,12 @@ package nl.rutgerkok.bo3tools;
 
 import java.util.logging.Logger;
 
+import nl.rutgerkok.bo3tools.command.BO2ConvertCommand;
+import nl.rutgerkok.bo3tools.command.BO2ConvertFolderCommand;
+import nl.rutgerkok.bo3tools.command.BO3CreateCommand;
 import nl.rutgerkok.bo3tools.util.PlayerDataCache;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -61,5 +65,22 @@ public class BO3Tools extends JavaPlugin {
      */
     public void removeNextBO3Data(Player player) {
         playerDataCache.remove(player);
+    }
+
+    /**
+     * Utility method to get the name of the command sender. If the sender is a
+     * player, the name of the player is used, otherwise the method returns
+     * "Unknown".
+     * 
+     * @param sender
+     *            The sender to get the name from.
+     * @return The name
+     */
+    public static String getAuthorName(CommandSender sender) {
+        if (sender instanceof Player) {
+            return sender.getName();
+        } else {
+            return "Unknown";
+        }
     }
 }
