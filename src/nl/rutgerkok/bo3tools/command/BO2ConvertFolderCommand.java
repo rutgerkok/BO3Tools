@@ -84,7 +84,7 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         if (globalObjects) {
             objects = TerrainControl.getCustomObjectManager().globalObjects.values();
         } else {
-            objects = world.getSettings().customObjects;
+            objects = world.getSettings().worldConfig.customObjects;
         }
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converting BO2s, hang on...");
         int count = convertBO2s(BO3Tools.getAuthorName(sender), objects);

@@ -12,7 +12,7 @@ import com.khorn.terraincontrol.customobjects.bo2.BO2;
 import com.khorn.terraincontrol.customobjects.bo2.ObjectCoordinate;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
 import com.khorn.terraincontrol.customobjects.bo3.BO3Config;
-import com.khorn.terraincontrol.customobjects.bo3.BO3Settings.SpawnHeightSetting;
+import com.khorn.terraincontrol.customobjects.bo3.BO3Settings.SpawnHeightEnum;
 import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
 
 public class BO2Converter {
@@ -37,8 +37,7 @@ public class BO2Converter {
         List<BlockFunction> newBlocks = new ArrayList<BlockFunction>();
         for (ObjectCoordinate oldBlock : bo2.data[0]) {
             BlockFunction newBlock = new BlockFunction();
-            newBlock.blockId = oldBlock.blockId;
-            newBlock.blockData = oldBlock.blockData;
+            newBlock.material = oldBlock.material;
             newBlock.x = oldBlock.x;
             newBlock.y = oldBlock.y;
             newBlock.z = oldBlock.z;
@@ -50,10 +49,10 @@ public class BO2Converter {
 
         // Convert SpawnHeight
         if (bo2.spawnAboveGround && !bo2.spawnUnderGround) {
-            bo3Config.spawnHeight = SpawnHeightSetting.highestSolidBlock;
+            bo3Config.spawnHeight = SpawnHeightEnum.highestSolidBlock;
         } else if (bo2.spawnUnderGround) {
             // Not exactly the same, but there isn't anything better
-            bo3Config.spawnHeight = SpawnHeightSetting.randomY;
+            bo3Config.spawnHeight = SpawnHeightEnum.randomY;
         }
 
         // Convert misc settings

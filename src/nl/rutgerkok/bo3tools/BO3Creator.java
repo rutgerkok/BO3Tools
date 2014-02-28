@@ -16,17 +16,18 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.Lists;
-import com.khorn.terraincontrol.DefaultMaterial;
+import com.khorn.terraincontrol.LocalMaterialData;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.configuration.Tag;
 import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
 import com.khorn.terraincontrol.customobjects.bo3.BlockCheck;
 import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
-import com.khorn.terraincontrol.util.BlockHelper;
+import com.khorn.terraincontrol.util.MaterialSet;
+import com.khorn.terraincontrol.util.MaterialSetEntry;
+import com.khorn.terraincontrol.util.NamedBinaryTag;
+import com.khorn.terraincontrol.util.minecraftTypes.DefaultMaterial;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
 /**
@@ -200,19 +201,17 @@ public class BO3Creator {
             for (int y = start.getBlockY(); y <= end.getBlockY(); y++) {
                 for (int z = start.getBlockZ(); z <= end.getBlockZ(); z++) {
                     Block block = world.getBlockAt(x, y, z);
-                    int id = block.getTypeId();
-                    byte data = block.getData();
-                    if (includeAir || id != 0) {
+                    LocalMaterialData material = getMaterial(block);
+                    if (includeAir || !material.isMaterial(DefaultMaterial.AIR)) {
                         BlockFunction blockFunction = new BlockFunction();
-                        blockFunction.blockId = id;
-                        blockFunction.blockData = filterData(id, data);
+                        blockFunction.material = filterMaterail(material);
                         blockFunction.x = x - center.getX();
                         blockFunction.y = y - center.getY();
                         blockFunction.z = z - center.getZ();
 
                         if (includeTileEntities) {
                             // Look for tile entities
-                            Tag tag = worldTC.getMetadata(x, y, z);
+                            NamedBinaryTag tag = worldTC.getMetadata(x, y, z);
                             if (tag != null) {
                                 String tileEntityName = tileEntityCount + "-" + getTileEntityName(tag) + ".nbt";
                                 File tileEntityFile = new File(tileEntitiesFolder, tileEntityName);
@@ -243,16 +242,20 @@ public class BO3Creator {
         return blocks;
     }
 
-    private byte filterData(int blockId, byte blockData) {
-        if (blockId == DefaultMaterial.LEAVES.id) {
+    private LocalMaterialData getMaterial(Block block) {
+        return TerrainControl.toLocalMaterialData(DefaultMaterial.getMaterial(block.getType().toString()), block.getData());
+    }
+
+    private LocalMaterialData filterMaterail(LocalMaterialData material) {
+        if (material.isMaterial(DefaultMaterial.LEAVES)) {
             // Leaves detected
             hasLeaves = true;
             if (!noLeavesFix) {
                 // Clear no-leave-decay flag
-                return (byte) (blockData % 4);
+                return material.withBlockData(material.getBlockData() % 4);
             }
         }
-        return blockData;
+        return material;
     }
 
     private List<BlockCheck> createBlockChecks() {
@@ -265,16 +268,15 @@ public class BO3Creator {
                 blockCheck.x = location.getX() - center.getX();
                 blockCheck.y = location.getY() - center.getY();
                 blockCheck.z = location.getZ() - center.getZ();
-                int blockId = block.getTypeId();
-                byte blockData = block.getData();
-                blockCheck.blockIds = Lists.newArrayList(blockId);
-                if (BlockHelper.rotateData(blockId, blockData) == blockData && blockData != 0) {
+                blockCheck.toCheck = new MaterialSet();
+                LocalMaterialData material = getMaterial(block);
+                if (material.rotate().equals(material)) {
                     // Data isn't used for rotation, so it's used for subdata
-                    // So if the data is not 0, add it
-                    blockCheck.blockDatas = Lists.newArrayList(blockData);
+                    // So take it into account for comparisons
+                    blockCheck.toCheck.add(new MaterialSetEntry(material, true));
                 } else {
                     // Data is used for rotation, so don't add it
-                    blockCheck.blockDatas = Lists.newArrayList((byte) -1);
+                    blockCheck.toCheck.add(new MaterialSetEntry(material, false));
                 }
 
                 blockCheck.setValid(true);
@@ -286,12 +288,10 @@ public class BO3Creator {
         }
     }
 
-    private String getTileEntityName(Tag tag) {
-        Tag[] values = (Tag[]) tag.getValue();
-        for (Tag childTag : values) {
-            if (childTag.getName().equals("id")) {
-                return (String) childTag.getValue();
-            }
+    private String getTileEntityName(NamedBinaryTag tag) {
+        NamedBinaryTag idTag = tag.getTag("id");
+        if (idTag != null) {
+            return (String) idTag.getValue();
         }
         return "Unknown";
     }
