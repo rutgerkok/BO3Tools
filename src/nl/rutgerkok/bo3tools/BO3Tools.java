@@ -1,7 +1,5 @@
 package nl.rutgerkok.bo3tools;
 
-import java.util.logging.Logger;
-
 import nl.rutgerkok.bo3tools.command.BO2ConvertCommand;
 import nl.rutgerkok.bo3tools.command.BO2ConvertFolderCommand;
 import nl.rutgerkok.bo3tools.command.BO3CreateCommand;
@@ -37,7 +35,7 @@ public class BO3Tools extends JavaPlugin {
     }
 
     public void log(String string) {
-        Logger.getLogger("Minecraft").info("[" + getDescription().getName() + "] " + string);
+        getLogger().info(string);
     }
 
     public void onEnable() {
