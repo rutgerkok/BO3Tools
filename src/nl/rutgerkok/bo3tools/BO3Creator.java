@@ -20,6 +20,7 @@ import com.khorn.terraincontrol.LocalMaterialData;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
+import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
 import com.khorn.terraincontrol.customobjects.bo3.BlockCheck;
@@ -179,7 +180,7 @@ public class BO3Creator {
         bo3.getSettings().settingsMode = ConfigMode.WriteDisable;
 
         // Save the BO3
-        bo3.getSettings().writeSettingsFile(true);
+        FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
 
         return bo3;
     }
@@ -233,7 +234,6 @@ public class BO3Creator {
 
                         }
 
-                        blockFunction.setValid(true);
                         blocks.add(blockFunction);
                     }
                 }
@@ -279,7 +279,6 @@ public class BO3Creator {
                     blockCheck.toCheck.add(new MaterialSetEntry(material, false));
                 }
 
-                blockCheck.setValid(true);
                 tcBlockChecks.add(blockCheck);
             }
             return tcBlockChecks;

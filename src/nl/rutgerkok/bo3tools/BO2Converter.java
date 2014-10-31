@@ -28,7 +28,7 @@ public class BO2Converter {
      * @return A new BO3 object
      */
     public static BO3 convertBO2(String authorName, BO2 bo2) {
-        File bo3File = new File(bo2.file.getParentFile(), bo2.getName() + ".bo3");
+        File bo3File = new File(bo2.getFile(), bo2.getName() + ".bo3");
         BO3 bo3 = new BO3(bo2.getName() + ".bo3", bo3File);
         bo3.onEnable(Collections.<String, CustomObject> emptyMap());
         BO3Config bo3Config = bo3.getSettings();
@@ -41,7 +41,6 @@ public class BO2Converter {
             newBlock.x = oldBlock.x;
             newBlock.y = oldBlock.y;
             newBlock.z = oldBlock.z;
-            newBlock.setValid(true);
             newBlocks.add(newBlock);
         }
         bo3Config.blocks[0] = newBlocks.toArray(new BlockFunction[0]);
@@ -57,7 +56,7 @@ public class BO2Converter {
 
         // Convert misc settings
         bo3Config.author = authorName;
-        bo3Config.description = "Converted version of the BO2 " + bo2.name;
+        bo3Config.description = "Converted version of the BO2 " + bo2.getName();
         bo3Config.tree = bo2.tree;
         bo3Config.minHeight = bo2.spawnElevationMin;
         bo3Config.maxHeight = bo2.spawnElevationMax - 1;

@@ -12,6 +12,8 @@ import org.bukkit.entity.Player;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
+import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
+import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.customobjects.bo2.BO2;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
@@ -60,7 +62,7 @@ public class BO2ConvertCommand implements CommandExecutor {
         BO3 bo3 = BO2Converter.convertBO2(authorName, bo2);
 
         // Save the BO3
-        bo3.getSettings().writeSettingsFile(true);
+        FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
 
         // Send message
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converted " + bo2.getName() + ".bo2 to the BO3 " + bo3.getName());
@@ -82,11 +84,11 @@ public class BO2ConvertCommand implements CommandExecutor {
     protected CustomObject getObject(LocalWorld world, String name) {
         CustomObject object = null;
         if (world != null) {
-            object = TerrainControl.getCustomObjectManager().getCustomObject(name, world);
+            object = world.getConfigs().getCustomObjects().getObjectByName(name);
         } else {
             // Player isn't in a TC world, or command is sent from the console.
             // Search the global objects.
-            object = TerrainControl.getCustomObjectManager().getCustomObject(name);
+            object = TerrainControl.getCustomObjectManager().getGlobalObjects().getObjectByName(name);
         }
 
         return object;

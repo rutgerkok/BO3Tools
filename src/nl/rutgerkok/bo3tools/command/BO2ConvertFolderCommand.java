@@ -2,7 +2,6 @@ package nl.rutgerkok.bo3tools.command;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,7 +20,10 @@ import org.bukkit.util.StringUtil;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
+import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
+import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
 import com.khorn.terraincontrol.customobjects.CustomObject;
+import com.khorn.terraincontrol.customobjects.CustomObjectCollection;
 import com.khorn.terraincontrol.customobjects.bo2.BO2;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
 
@@ -80,11 +82,11 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         }
 
         // Get and convert objects
-        Collection<CustomObject> objects;
+        CustomObjectCollection objects;
         if (globalObjects) {
-            objects = TerrainControl.getCustomObjectManager().globalObjects.values();
+            objects = TerrainControl.getCustomObjectManager().getGlobalObjects();
         } else {
-            objects = world.getSettings().worldConfig.customObjects;
+            objects = world.getConfigs().getCustomObjects();
         }
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converting BO2s, hang on...");
         int count = convertBO2s(BO3Tools.getAuthorName(sender), objects);
@@ -109,7 +111,7 @@ public class BO2ConvertFolderCommand implements TabExecutor {
      *            The objects to convert.
      * @return The number of objects that were converted.
      */
-    protected int convertBO2s(String author, Collection<CustomObject> objects) {
+    protected int convertBO2s(String author, CustomObjectCollection objects) {
         int count = 0;
 
         for (CustomObject object : objects) {
@@ -119,10 +121,10 @@ public class BO2ConvertFolderCommand implements TabExecutor {
                 BO3 bo3 = BO2Converter.convertBO2(author, bo2);
 
                 // Save BO3
-                bo3.getSettings().writeSettingsFile(true);
+                FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
 
                 // Move old BO2
-                bo2.file.renameTo(new File(bo2.file.getAbsolutePath() + ".old"));
+                bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));
 
                 // Increment count
                 count++;
