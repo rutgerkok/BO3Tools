@@ -1,6 +1,6 @@
 name: BO3Tools
 main: nl.rutgerkok.bo3tools.BO3Tools
-version: 1.3
+version: 1.4
 author: "Rutger Kok"
 depend: ["TerrainControl", "WorldEdit"]
 description: Bukkit plugin to help you working with the BO3 objects.
