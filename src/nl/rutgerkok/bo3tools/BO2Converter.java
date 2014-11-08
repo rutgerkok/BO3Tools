@@ -28,8 +28,8 @@ public class BO2Converter {
      * @return A new BO3 object
      */
     public static BO3 convertBO2(String authorName, BO2 bo2) {
-        File bo3File = new File(bo2.getFile(), bo2.getName() + ".bo3");
-        BO3 bo3 = new BO3(bo2.getName() + ".bo3", bo3File);
+        File bo3File = new File(bo2.getFile().getParentFile(), bo2.getName() + ".bo3");
+        BO3 bo3 = new BO3(bo2.getName(), bo3File);
         bo3.onEnable(Collections.<String, CustomObject> emptyMap());
         BO3Config bo3Config = bo3.getSettings();
 
@@ -43,7 +43,7 @@ public class BO2Converter {
             newBlock.z = oldBlock.z;
             newBlocks.add(newBlock);
         }
-        bo3Config.blocks[0] = newBlocks.toArray(new BlockFunction[0]);
+        bo3Config.blocks[0] = newBlocks.toArray(new BlockFunction[newBlocks.size()]);
         bo3Config.rotateBlocksAndChecks();
 
         // Convert SpawnHeight
