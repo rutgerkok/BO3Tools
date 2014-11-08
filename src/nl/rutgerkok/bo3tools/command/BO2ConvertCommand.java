@@ -1,5 +1,7 @@
 package nl.rutgerkok.bo3tools.command;
 
+import java.io.File;
+
 import nl.rutgerkok.bo3tools.BO2Converter;
 import nl.rutgerkok.bo3tools.BO3Tools;
 
@@ -63,6 +65,9 @@ public class BO2ConvertCommand implements CommandExecutor {
 
         // Save the BO3
         FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
+
+        // Move old BO2
+        bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));
 
         // Send message
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converted " + bo2.getName() + ".bo2 to the BO3 " + bo3.getName());
