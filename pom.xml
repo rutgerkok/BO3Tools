@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.rutgerkok.bo3tools</groupId>
+	<artifactId>BO3Tools</artifactId>
+	<version>1.5</version>
+	<name>BO3Tools</name>
+	<description>BO3s are objects used by TerrainControl. BO3Tools allows you to export your WorldEdit selection as a BO3 object. It can also convert a BO2 object to a BO3 object.</description>
+	<url>https://github.com/rutgerkok/BO3Tools</url>
+	<repositories>
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<!-- For WorldEdit -->
+			<id>sk89q-repo</id>
+			<url>http://maven.sk89q.com/repo/</url>
+		</repository>
+		<repository>
+			<!-- For TerrainControl -->
+			<id>rutger-repo</id>
+			<url>http://www.rutgerkok.nl/repo</url>
+		</repository>
+	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>1.9-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sk89q</groupId>
+			<artifactId>worldedit</artifactId>
+			<version>5.5.8</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.khorn.terraincontrol</groupId>
+			<artifactId>terraincontrol-common</artifactId>
+			<version>2.7.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.khorn.terraincontrol</groupId>
+			<artifactId>terraincontrol-bukkit</artifactId>
+			<version>2.7.2</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<inceptionYear>2013</inceptionYear>
+</project>
