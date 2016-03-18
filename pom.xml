@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.rutgerkok.bo3tools</groupId>
 	<artifactId>BO3Tools</artifactId>
-	<version>1.5</version>
+	<version>1.6-SNAPSHOT</version>
 	<name>BO3Tools</name>
 	<description>BO3s are objects used by TerrainControl. BO3Tools allows you to export your WorldEdit selection as a BO3 object. It can also convert a BO2 object to a BO3 object.</description>
 	<url>https://github.com/rutgerkok/BO3Tools</url>
