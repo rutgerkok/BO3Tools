@@ -81,10 +81,13 @@ public class BO2ConvertCommand implements CommandExecutor {
     /**
      * Looks for the object with the given name in the given world's
      * WorldObjects folder or in Global objects if no world is specified.
-     * 
+     *
      * @param world
+     *            The world the object is in, or null to search only in the
+     *            global objects directory.
      * @param name
-     * @return
+     *            The name of the object.
+     * @return The object, or null if not found.
      */
     protected CustomObject getObject(LocalWorld world, String name) {
         CustomObject object = null;
