@@ -121,7 +121,8 @@ public class BO2ConvertFolderCommand implements TabExecutor {
                 BO3 bo3 = BO2Converter.convertBO2(author, bo2);
 
                 // Save BO3
-                FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
+                FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(),
+                        ConfigMode.WriteAll);
 
                 // Move old BO2
                 bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));

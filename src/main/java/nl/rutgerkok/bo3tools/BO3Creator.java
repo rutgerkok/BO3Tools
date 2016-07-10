@@ -23,6 +23,7 @@ import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
 import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.customobjects.bo3.BO3;
+import com.khorn.terraincontrol.customobjects.bo3.BO3PlaceableFunction;
 import com.khorn.terraincontrol.customobjects.bo3.BlockCheck;
 import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
 import com.khorn.terraincontrol.util.MaterialSet;
@@ -160,8 +161,8 @@ public class BO3Creator {
         bo3.onEnable(Collections.<String, CustomObject> emptyMap());
 
         // Add the blocks to the BO3
-        List<BlockFunction> blocks = createBlocks();
-        bo3.getSettings().blocks[0] = blocks.toArray(new BlockFunction[blocks.size()]);
+        List<BO3PlaceableFunction> blocks = createBlocks();
+        bo3.getSettings().blocks[0] = blocks.toArray(new BO3PlaceableFunction[blocks.size()]);
 
         // Add the block checks to the BO3
         List<BlockCheck> blockChecks = createBlockChecks();
@@ -180,12 +181,12 @@ public class BO3Creator {
         bo3.getSettings().settingsMode = ConfigMode.WriteDisable;
 
         // Save the BO3
-        FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
+        FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(), ConfigMode.WriteAll);
 
         return bo3;
     }
 
-    private List<BlockFunction> createBlocks() {
+    private List<BO3PlaceableFunction> createBlocks() {
         File tileEntitiesFolder = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), name);
         if (includeTileEntities) {
             tileEntitiesFolder.mkdirs();
@@ -197,18 +198,17 @@ public class BO3Creator {
         Location start = selection.getMinimumPoint();
         Location end = selection.getMaximumPoint();
 
-        List<BlockFunction> blocks = new ArrayList<BlockFunction>(selection.getWidth() * selection.getHeight() * selection.getLength());
+        List<BO3PlaceableFunction> blocks = new ArrayList<BO3PlaceableFunction>(
+                selection.getWidth() * selection.getHeight() * selection.getLength());
         for (int x = start.getBlockX(); x <= end.getBlockX(); x++) {
             for (int y = start.getBlockY(); y <= end.getBlockY(); y++) {
                 for (int z = start.getBlockZ(); z <= end.getBlockZ(); z++) {
                     Block block = world.getBlockAt(x, y, z);
                     LocalMaterialData material = getMaterial(block);
                     if (includeAir || !material.isMaterial(DefaultMaterial.AIR)) {
-                        BlockFunction blockFunction = new BlockFunction();
-                        blockFunction.material = filterMaterail(material);
-                        blockFunction.x = x - center.getX();
-                        blockFunction.y = y - center.getY();
-                        blockFunction.z = z - center.getZ();
+                        BlockFunction blockFunction = new BlockFunction(null,
+                                x - center.getX(), y - center.getY(), z - center.getZ(),
+                                filterMaterail(material));
 
                         if (includeTileEntities) {
                             // Look for tile entities
@@ -224,7 +224,6 @@ public class BO3Creator {
                                     tag.writeTo(fos);
                                     fos.flush();
                                     fos.close();
-                                    blockFunction.hasMetaData = true;
                                     blockFunction.metaDataTag = tag;
                                     blockFunction.metaDataName = name + "/" + tileEntityName;
                                 } catch (IOException e) {
@@ -264,11 +263,8 @@ public class BO3Creator {
             List<BlockCheck> tcBlockChecks = new ArrayList<BlockCheck>(blockChecks.size());
             for (BlockLocation location : blockChecks) {
                 Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
-                BlockCheck blockCheck = new BlockCheck();
-                blockCheck.x = location.getX() - center.getX();
-                blockCheck.y = location.getY() - center.getY();
-                blockCheck.z = location.getZ() - center.getZ();
-                blockCheck.toCheck = new MaterialSet();
+                BlockCheck blockCheck = new BlockCheck(null, new MaterialSet(), location.getX() - center.getX(),
+                        location.getY() - center.getY(), location.getZ() - center.getZ());
                 LocalMaterialData material = getMaterial(block);
                 if (material.rotate().equals(material)) {
                     // Data isn't used for rotation, so it's used for subdata

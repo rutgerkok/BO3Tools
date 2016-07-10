@@ -36,11 +36,8 @@ public class BO2Converter {
         // Convert all blocks
         List<BlockFunction> newBlocks = new ArrayList<BlockFunction>();
         for (ObjectCoordinate oldBlock : bo2.data[0]) {
-            BlockFunction newBlock = new BlockFunction();
-            newBlock.material = oldBlock.material;
-            newBlock.x = oldBlock.x;
-            newBlock.y = oldBlock.y;
-            newBlock.z = oldBlock.z;
+            BlockFunction newBlock = new BlockFunction(bo3Config, oldBlock.x, oldBlock.y, oldBlock.z,
+                    oldBlock.material);
             newBlocks.add(newBlock);
         }
         bo3Config.blocks[0] = newBlocks.toArray(new BlockFunction[newBlocks.size()]);

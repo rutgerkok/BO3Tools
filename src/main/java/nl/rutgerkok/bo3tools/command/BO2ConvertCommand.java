@@ -64,7 +64,7 @@ public class BO2ConvertCommand implements CommandExecutor {
         BO3 bo3 = BO2Converter.convertBO2(authorName, bo2);
 
         // Save the BO3
-        FileSettingsWriter.writeToFile(bo3.getSettings(), ConfigMode.WriteAll);
+        FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(), ConfigMode.WriteAll);
 
         // Move old BO2
         bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));
