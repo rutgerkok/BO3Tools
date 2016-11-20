@@ -35,9 +35,22 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
 /**
  * Creates a BO3 with the given parameters. Doesn't check the BO3 size. so be
  * sure that those aren't too big.
- * 
+ *
  */
 public class BO3Creator {
+
+    /**
+     * Creates a new BO3 creator.
+     *
+     * @param name
+     *            Name of the BO3.
+     * @return The BO3Creator, for easy linking.
+     */
+    public static BO3Creator name(String name) {
+        Validate.notNull(name, "Name cannot be null");
+        return new BO3Creator(name);
+    }
+
     private String name;
     private BlockLocation center;
     private Selection selection;
@@ -54,20 +67,8 @@ public class BO3Creator {
     }
 
     /**
-     * Creates a new BO3 creator.
-     * 
-     * @param name
-     *            Name of the BO3.
-     * @return The BO3Creator, for easy linking.
-     */
-    public static BO3Creator name(String name) {
-        Validate.notNull(name, "Name cannot be null");
-        return new BO3Creator(name);
-    }
-
-    /**
      * Sets the author.
-     * 
+     *
      * @param player
      *            The author.
      * @return The BO3Creator, for easy linking.
@@ -78,21 +79,8 @@ public class BO3Creator {
     }
 
     /**
-     * Sets the center.
-     * 
-     * @param location
-     *            The location of the center.
-     * @return The BO3Creator, for easy linking.
-     */
-    public BO3Creator center(BlockLocation location) {
-        Validate.notNull(location, "Center cannot be null");
-        center = location;
-        return this;
-    }
-
-    /**
      * Sets the block checks to include.
-     * 
+     *
      * @param locations
      *            The locations. Can be immutable.
      * @return The BO3Creator, for easy linking.
@@ -104,50 +92,21 @@ public class BO3Creator {
     }
 
     /**
-     * Sets the bounds.
-     * 
-     * @param selection
-     *            The bounds.
+     * Sets the center.
+     *
+     * @param location
+     *            The location of the center.
      * @return The BO3Creator, for easy linking.
      */
-    public BO3Creator selection(Selection selection) {
-        Validate.notNull(selection, "Selection cannot be null");
-        this.selection = selection;
-        return this;
-    }
-
-    /**
-     * Activates tile entities.
-     * 
-     * @param world
-     *            The LocalWorld object, which is needed for tile entities.
-     * @return The BO3Creator, for easy linking.
-     */
-    public BO3Creator includeTileEntities(LocalWorld world) {
-        Validate.notNull(world, "World cannot be null");
-        this.worldTC = world;
-        this.includeTileEntities = true;
-        return this;
-    }
-
-    /**
-     * Includes all air blocks in the BO3.
-     * 
-     * @return The BO3Creator, for easy linking.
-     */
-    public BO3Creator includeAir() {
-        this.includeAir = true;
-        return this;
-    }
-
-    public BO3Creator noLeavesFix() {
-        this.noLeavesFix = true;
+    public BO3Creator center(BlockLocation location) {
+        Validate.notNull(location, "Center cannot be null");
+        center = location;
         return this;
     }
 
     /**
      * Creates the BO3 with the given settings. BO3 is automatically saved.
-     * 
+     *
      * @return The newly created BO3.
      */
     public BO3 create() {
@@ -184,6 +143,32 @@ public class BO3Creator {
         FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(), ConfigMode.WriteAll);
 
         return bo3;
+    }
+
+    private List<BlockCheck> createBlockChecks() {
+        if (blockChecks != null) {
+            World world = selection.getWorld();
+            List<BlockCheck> tcBlockChecks = new ArrayList<BlockCheck>(blockChecks.size());
+            for (BlockLocation location : blockChecks) {
+                Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
+                BlockCheck blockCheck = new BlockCheck(null, new MaterialSet(), location.getX() - center.getX(),
+                        location.getY() - center.getY(), location.getZ() - center.getZ());
+                LocalMaterialData material = getMaterial(block);
+                if (material.rotate().equals(material)) {
+                    // Data isn't used for rotation, so it's used for subdata
+                    // So take it into account for comparisons
+                    blockCheck.toCheck.add(new MaterialSetEntry(material, true));
+                } else {
+                    // Data is used for rotation, so don't add it
+                    blockCheck.toCheck.add(new MaterialSetEntry(material, false));
+                }
+
+                tcBlockChecks.add(blockCheck);
+            }
+            return tcBlockChecks;
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private List<BO3PlaceableFunction> createBlocks() {
@@ -241,10 +226,6 @@ public class BO3Creator {
         return blocks;
     }
 
-    private LocalMaterialData getMaterial(Block block) {
-        return TerrainControl.toLocalMaterialData(DefaultMaterial.getMaterial(block.getType().toString()), block.getData());
-    }
-
     private LocalMaterialData filterMaterail(LocalMaterialData material) {
         if (material.isMaterial(DefaultMaterial.LEAVES)) {
             // Leaves detected
@@ -257,38 +238,60 @@ public class BO3Creator {
         return material;
     }
 
-    private List<BlockCheck> createBlockChecks() {
-        if (blockChecks != null) {
-            World world = selection.getWorld();
-            List<BlockCheck> tcBlockChecks = new ArrayList<BlockCheck>(blockChecks.size());
-            for (BlockLocation location : blockChecks) {
-                Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
-                BlockCheck blockCheck = new BlockCheck(null, new MaterialSet(), location.getX() - center.getX(),
-                        location.getY() - center.getY(), location.getZ() - center.getZ());
-                LocalMaterialData material = getMaterial(block);
-                if (material.rotate().equals(material)) {
-                    // Data isn't used for rotation, so it's used for subdata
-                    // So take it into account for comparisons
-                    blockCheck.toCheck.add(new MaterialSetEntry(material, true));
-                } else {
-                    // Data is used for rotation, so don't add it
-                    blockCheck.toCheck.add(new MaterialSetEntry(material, false));
-                }
-
-                tcBlockChecks.add(blockCheck);
-            }
-            return tcBlockChecks;
-        } else {
-            return Collections.emptyList();
-        }
+    private LocalMaterialData getMaterial(Block block) {
+        return TerrainControl.toLocalMaterialData(DefaultMaterial.getMaterial(block.getType().toString()), block.getData());
     }
 
     private String getTileEntityName(NamedBinaryTag tag) {
         NamedBinaryTag idTag = tag.getTag("id");
         if (idTag != null) {
-            return (String) idTag.getValue();
+            String name = (String) idTag.getValue();
+            // Make name filesystem-friendly
+            return name.replace("minecraft:", "").replace(':', '_');
         }
         return "Unknown";
+    }
+
+    /**
+     * Includes all air blocks in the BO3.
+     *
+     * @return The BO3Creator, for easy linking.
+     */
+    public BO3Creator includeAir() {
+        this.includeAir = true;
+        return this;
+    }
+
+    /**
+     * Activates tile entities.
+     *
+     * @param world
+     *            The LocalWorld object, which is needed for tile entities.
+     * @return The BO3Creator, for easy linking.
+     */
+    public BO3Creator includeTileEntities(LocalWorld world) {
+        Validate.notNull(world, "World cannot be null");
+        this.worldTC = world;
+        this.includeTileEntities = true;
+        return this;
+    }
+
+    public BO3Creator noLeavesFix() {
+        this.noLeavesFix = true;
+        return this;
+    }
+
+    /**
+     * Sets the bounds.
+     *
+     * @param selection
+     *            The bounds.
+     * @return The BO3Creator, for easy linking.
+     */
+    public BO3Creator selection(Selection selection) {
+        Validate.notNull(selection, "Selection cannot be null");
+        this.selection = selection;
+        return this;
     }
 
 }
