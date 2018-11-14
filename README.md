@@ -5,7 +5,7 @@ Tools to help with the creation of BO3s. See [here](http://dev.bukkit.org/server
 
 ## Compatibility
 
-BO3Tools has been updated to work with OpenTerrainGenerator version "1.12.2 - v6", available on the [releases](releases) tab. It is no longer compatible with TerrainControl.
+BO3Tools has been updated to work with OpenTerrainGenerator version "1.12.2 - v6", available on the [releases](/../../releases) tab. It is no longer compatible with TerrainControl.
 
 
 ## Build Instructions
@@ -13,33 +13,33 @@ BO3Tools has been updated to work with OpenTerrainGenerator version "1.12.2 - v6
 BO3Tools depends on OpenTerrainGenerator, installed in the local Maven repository. Due to a problem with the Forge build at the time of writing, you are advised to follow the procedure below:
 
  1. Check out the OpenTerrainGenerator sources:
-    ```
+```
 git clone https://github.com/PG85/OpenTerrainGenerator
-    ```
- 1. Change into the project root directory:
-    ```
+```
+ 2. Change into the project root directory:
+```
 cd OpenTerrainGenerator
-    ```
- 1. Edit `settings.gradle` to exclude `'platforms:forge'`:
-    ```
+```
+ 3. Edit `settings.gradle` to exclude `'platforms:forge'`:
+```
 include 'common', 'platforms:bukkit', 'releases'    
 // Was: include 'common', 'platforms:bukkit', 'platforms:forge', 'releases'
-    ```
- 1. Install OpenTerrainGenerator JAR files to the local Maven respository:
-    ```
+```
+ 4. Install OpenTerrainGenerator JAR files to the local Maven respository:
+```
 ./gradlew install
-    ```
- 1. Now you are ready to build BO3Tools. Check out the sources:
-    ```
+```
+ 5. Now you are ready to build BO3Tools. Check out the sources:
+```
 cd ..
 git clone https://github.com/totemo/BO3Tools
-    ```
-  1. Change into the project root directory and build with Maven:
-    ```
+```
+ 6. Change into the project root directory and build with Maven:
+```
 cd BO3Tools
 mvn
-    ```
-    * The JAR file will be created in the `target/` sub-directory.
+```
+   * The JAR file will be created in the `target/` sub-directory.
 
  
 ## License
