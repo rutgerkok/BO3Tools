@@ -204,11 +204,11 @@ public class BO3Creator {
                     Block block = world.getBlockAt(x, y, z);
                     LocalMaterialData material = getMaterial(block);
                     if (includeAir || !material.isMaterial(DefaultMaterial.AIR)) {
-                        BlockFunction blockFunction = (BlockFunction) CustomObjectConfigFunction.create(null, BlockFunction.class);
-                        blockFunction.x = x - center.getX();
-                        blockFunction.y = x - center.getY();
-                        blockFunction.z = z - center.getZ();
-                        blockFunction.material = material;
+                        BlockFunction blockFunction = (BlockFunction) CustomObjectConfigFunction.create(null, BlockFunction.class,
+                                                                                                        x - center.getX(),
+                                                                                                        y - center.getY(),
+                                                                                                        z - center.getZ(),
+                                                                                                        material);
 
                         if (includeTileEntities) {
                             // Look for tile entities

@@ -2,7 +2,7 @@ name: '${project.name}'
 main: nl.rutgerkok.bo3tools.BO3Tools
 version: '${project.version}'
 author: "Rutger Kok"
-depend: ["TerrainControl", "WorldEdit"]
+depend: ["OpenTerrainGenerator", "WorldEdit"]
 description: Bukkit plugin to help you working with the BO3 objects.
 permissions:
   bo3tools.all:
