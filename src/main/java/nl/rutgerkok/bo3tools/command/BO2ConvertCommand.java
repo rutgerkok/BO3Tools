@@ -2,23 +2,22 @@ package nl.rutgerkok.bo3tools.command;
 
 import java.io.File;
 
-import nl.rutgerkok.bo3tools.BO2Converter;
-import nl.rutgerkok.bo3tools.BO3Tools;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
-import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
-import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
-import com.khorn.terraincontrol.customobjects.CustomObject;
-import com.khorn.terraincontrol.customobjects.bo2.BO2;
-import com.khorn.terraincontrol.customobjects.bo3.BO3;
+import com.pg85.otg.LocalWorld;
+import com.pg85.otg.OTG;
+import com.pg85.otg.bukkit.commands.BaseCommand;
+import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.customobjects.bo2.BO2;
+import com.pg85.otg.customobjects.bo3.BO3;
+
+import nl.rutgerkok.bo3tools.BO2Converter;
+import nl.rutgerkok.bo3tools.BO3Creator;
+import nl.rutgerkok.bo3tools.BO3Tools;
 
 public class BO2ConvertCommand implements CommandExecutor {
 
@@ -30,7 +29,7 @@ public class BO2ConvertCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        LocalWorld world = (sender instanceof Player) ? TerrainControl.getWorld(((Player) sender).getWorld().getName()) : null;
+        LocalWorld world = (sender instanceof Player) ? OTG.getWorld(((Player) sender).getWorld().getName()) : null;
 
         if (args.length != 1) {
             // Someone hasn't read the help files ;)
@@ -64,7 +63,7 @@ public class BO2ConvertCommand implements CommandExecutor {
         BO3 bo3 = BO2Converter.convertBO2(authorName, bo2);
 
         // Save the BO3
-        FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(), ConfigMode.WriteAll);
+        BO3Creator.saveBO3(bo3);
 
         // Move old BO2
         bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));
@@ -82,25 +81,14 @@ public class BO2ConvertCommand implements CommandExecutor {
      * Looks for the object with the given name in the given world's
      * WorldObjects folder or in Global objects if no world is specified.
      *
-     * @param world
-     *            The world the object is in, or null to search only in the
-     *            global objects directory.
-     * @param name
-     *            The name of the object.
+     * @param world The world the object is in, or null to search only in the
+     *        global objects directory.
+     * @param name The name of the object.
      * @return The object, or null if not found.
      */
     protected CustomObject getObject(LocalWorld world, String name) {
-        CustomObject object = null;
-        if (world != null) {
-            object = world.getConfigs().getCustomObjects().getObjectByName(name);
-        } else {
-            // Player isn't in a TC world, or command is sent from the console.
-            // Search the global objects.
-            object = TerrainControl.getCustomObjectManager().getGlobalObjects().getObjectByName(name);
-        }
-
-        return object;
-
+        String worldName = (world != null) ? world.getName() : null;
+        return OTG.getCustomObjectManager().getGlobalObjects().getObjectByName(name, worldName);
     }
 
 }

@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
-import com.khorn.terraincontrol.customobjects.CustomObject;
-import com.khorn.terraincontrol.customobjects.bo2.BO2;
-import com.khorn.terraincontrol.customobjects.bo2.ObjectCoordinate;
-import com.khorn.terraincontrol.customobjects.bo3.BO3;
-import com.khorn.terraincontrol.customobjects.bo3.BO3Config;
-import com.khorn.terraincontrol.customobjects.bo3.BO3Settings.SpawnHeightEnum;
-import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
+import com.pg85.otg.configuration.CustomObjectConfigFunction;
+import com.pg85.otg.configuration.WorldConfig.ConfigMode;
+import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.customobjects.bo2.BO2;
+import com.pg85.otg.customobjects.bo2.ObjectCoordinate;
+import com.pg85.otg.customobjects.bo3.BO3;
+import com.pg85.otg.customobjects.bo3.BO3Config;
+import com.pg85.otg.customobjects.bo3.BO3Settings.SpawnHeightEnum;
+import com.pg85.otg.customobjects.bo3.BlockFunction;
 
 public class BO2Converter {
 
@@ -21,10 +21,8 @@ public class BO2Converter {
      * Converts the given BO2 into a new BO3 object. All blocks and most
      * settings are converted. The BO3 isn't saved.
      * 
-     * @param authorName
-     *            Name that is used in the author setting of the BO3.
-     * @param bo2
-     *            The BO2 object to convert
+     * @param authorName Name that is used in the author setting of the BO3.
+     * @param bo2 The BO2 object to convert
      * @return A new BO3 object
      */
     public static BO3 convertBO2(String authorName, BO2 bo2) {
@@ -36,8 +34,11 @@ public class BO2Converter {
         // Convert all blocks
         List<BlockFunction> newBlocks = new ArrayList<BlockFunction>();
         for (ObjectCoordinate oldBlock : bo2.data[0]) {
-            BlockFunction newBlock = new BlockFunction(bo3Config, oldBlock.x, oldBlock.y, oldBlock.z,
-                    oldBlock.material);
+            BlockFunction newBlock = (BlockFunction) CustomObjectConfigFunction.create(bo3Config, BlockFunction.class);
+            newBlock.x = oldBlock.x;
+            newBlock.y = oldBlock.y;
+            newBlock.z = oldBlock.z;
+            newBlock.material = oldBlock.material;
             newBlocks.add(newBlock);
         }
         bo3Config.blocks[0] = newBlocks.toArray(new BlockFunction[newBlocks.size()]);
@@ -60,7 +61,7 @@ public class BO2Converter {
         bo3Config.maxPercentageOutsideSourceBlock = (int) bo2.collisionPercentage;
         bo3Config.rotateRandomly = bo2.randomRotation;
         bo3Config.settingsMode = ConfigMode.WriteDisable;
-        bo3Config.excludedBiomes = Lists.newArrayList();
+        bo3Config.excludedBiomes = new ArrayList<>();
 
         return bo3;
     }

@@ -4,11 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import nl.rutgerkok.bo3tools.BO3Creator;
-import nl.rutgerkok.bo3tools.BO3Tools;
-import nl.rutgerkok.bo3tools.NextBO3Data;
-import nl.rutgerkok.bo3tools.util.InvalidBO3Exception;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -17,12 +12,17 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import com.google.common.collect.Lists;
-import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
-import com.khorn.terraincontrol.customobjects.bo3.BO3;
+import com.pg85.otg.LocalWorld;
+import com.pg85.otg.OTG;
+import com.pg85.otg.bukkit.commands.BaseCommand;
+import com.pg85.otg.customobjects.bo3.BO3;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
+
+import nl.rutgerkok.bo3tools.BO3Creator;
+import nl.rutgerkok.bo3tools.BO3Tools;
+import nl.rutgerkok.bo3tools.NextBO3Data;
+import nl.rutgerkok.bo3tools.util.InvalidBO3Exception;
 
 public class BO3CreateCommand implements TabExecutor {
     public static final List<String> AUTO_COMPLETE_OPTIONS = Lists.newArrayList("--includeair", "--includetileentities", "--noleavesfix");
@@ -31,7 +31,7 @@ public class BO3CreateCommand implements TabExecutor {
     public static final String INCLUDE_TILE_ENTITIES = AUTO_COMPLETE_OPTIONS.get(1);
     public static final String NO_LEAVES_FIX = AUTO_COMPLETE_OPTIONS.get(2);
 
-    private BO3Tools plugin;
+    private final BO3Tools plugin;
 
     public BO3CreateCommand(BO3Tools plugin) {
         this.plugin = plugin;
@@ -53,7 +53,7 @@ public class BO3CreateCommand implements TabExecutor {
         // Some variables
         Player player = (Player) sender;
         World world = player.getWorld();
-        LocalWorld worldTC = TerrainControl.getWorld(world.getName());
+        LocalWorld worldTC = OTG.getWorld(world.getName());
         String bo3Name = "we-" + args[0];
 
         // Get the selection

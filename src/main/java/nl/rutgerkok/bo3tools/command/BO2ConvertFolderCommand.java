@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import nl.rutgerkok.bo3tools.BO2Converter;
-import nl.rutgerkok.bo3tools.BO3Tools;
-
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -17,15 +14,17 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
-import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
-import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
-import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
-import com.khorn.terraincontrol.customobjects.CustomObject;
-import com.khorn.terraincontrol.customobjects.CustomObjectCollection;
-import com.khorn.terraincontrol.customobjects.bo2.BO2;
-import com.khorn.terraincontrol.customobjects.bo3.BO3;
+import com.pg85.otg.LocalWorld;
+import com.pg85.otg.OTG;
+import com.pg85.otg.bukkit.commands.BaseCommand;
+import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.customobjects.CustomObjectCollection;
+import com.pg85.otg.customobjects.bo2.BO2;
+import com.pg85.otg.customobjects.bo3.BO3;
+
+import nl.rutgerkok.bo3tools.BO2Converter;
+import nl.rutgerkok.bo3tools.BO3Creator;
+import nl.rutgerkok.bo3tools.BO3Tools;
 
 /**
  * 
@@ -56,7 +55,7 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         // Fetch world
         if (sender instanceof Player) {
             String worldName = ((Player) sender).getWorld().getName();
-            world = TerrainControl.getWorld(worldName);
+            world = OTG.getWorld(worldName);
         }
 
         // Parse arguments
@@ -65,7 +64,7 @@ public class BO2ConvertFolderCommand implements TabExecutor {
             if (arg.equalsIgnoreCase(GLOBAL)) {
                 globalObjects = true;
             } else {
-                world = TerrainControl.getWorld(arg);
+                world = OTG.getWorld(arg);
                 if (world == null) {
                     sender.sendMessage(BaseCommand.ERROR_COLOR + "World '" + arg + "' not found.");
                 }
@@ -82,14 +81,13 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         }
 
         // Get and convert objects
-        CustomObjectCollection objects;
-        if (globalObjects) {
-            objects = TerrainControl.getCustomObjectManager().getGlobalObjects();
-        } else {
-            objects = world.getConfigs().getCustomObjects();
-        }
+        CustomObjectCollection objects = OTG.getCustomObjectManager().getGlobalObjects();
+        String worldName = (world != null && !globalObjects) ? world.getName() : null;
+        // NOTE: totemo: original code got objects from the world itself. That
+        // no longer exists in the OTG API.
+
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converting BO2s, hang on...");
-        int count = convertBO2s(BO3Tools.getAuthorName(sender), objects);
+        int count = convertBO2s(BO3Tools.getAuthorName(sender), objects, worldName);
 
         // Messages
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Done! Converted " + count + " BO2s.");
@@ -105,24 +103,29 @@ public class BO2ConvertFolderCommand implements TabExecutor {
      * Converts all BO2s in the CustomObject collection. Ignores all other
      * objects in the list.
      * 
-     * @param author
-     *            The author that should be used for the objects.
-     * @param objects
-     *            The objects to convert.
+     * @param author The author that should be used for the objects.
+     * @param objects The objects to convert.
+     * @param worldName The name of the world whose objects are converted, or
+     *        null to convert global objects.
      * @return The number of objects that were converted.
      */
-    protected int convertBO2s(String author, CustomObjectCollection objects) {
+    protected int convertBO2s(String author, CustomObjectCollection objects, String worldName) {
         int count = 0;
 
-        for (CustomObject object : objects) {
+        // TODO: totemo: support iteration over CustomObjectCollection.
+        // CustomObjectCollection doesn't have any methods to permit iteration.
+        // I *could* hack something up with reflection.
+        // Since I have not pressing need for this command at the moment, I have
+        // left this unimplemented.
+        CustomObject[] allObjects = new CustomObject[0];
+        for (CustomObject object : allObjects) {
             if (object instanceof BO2) {
                 // Convert BO2
                 BO2 bo2 = (BO2) object;
                 BO3 bo3 = BO2Converter.convertBO2(author, bo2);
 
                 // Save BO3
-                FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(),
-                        ConfigMode.WriteAll);
+                BO3Creator.saveBO3(bo3);
 
                 // Move old BO2
                 bo2.getFile().renameTo(new File(bo2.getFile().getAbsolutePath() + ".old"));
