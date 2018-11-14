@@ -1,6 +1,6 @@
-[Home](http://dev.bukkit.org/bukkit-mods/bo3tools/) | **Source** | [Commands and permissions](http://dev.bukkit.org/bukkit-mods/bo3tools/pages/commands/) | [Changelog](http://dev.bukkit.org/bukkit-mods/bo3tools/pages/changelog/)
+[Home](http://dev.bukkit.org/projects/bo3tools) | **Source** | [Commands and permissions](https://dev.bukkit.org/projects/bo3tools/pages/commands) | [Changelog](https://dev.bukkit.org/projects/bo3tools/pages/changelog)
 
-Tools to help with the creation of BO3s. See [here](http://dev.bukkit.org/server-mods/bo3tools/) for more information. Feel free to open a pull request (I like them!), just make sure to use no tabs (use spaces!), LF line endings and try to keep your code formatting like me.
+Tools to help with the creation of BO3s. See [here](http://dev.bukkit.org/projects/bo3tools) for more information. Feel free to open a pull request (I like them!), just make sure to use no tabs (use spaces!), LF line endings and try to keep your code formatting like me.
 
 
 ## Compatibility
