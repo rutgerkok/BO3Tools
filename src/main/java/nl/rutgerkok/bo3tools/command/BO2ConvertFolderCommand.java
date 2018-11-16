@@ -1,8 +1,10 @@
 package nl.rutgerkok.bo3tools.command;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -21,6 +23,7 @@ import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.customobjects.CustomObjectCollection;
 import com.pg85.otg.customobjects.bo2.BO2;
 import com.pg85.otg.customobjects.bo3.BO3;
+import com.pg85.otg.logging.LogMarker;
 
 import nl.rutgerkok.bo3tools.BO2Converter;
 import nl.rutgerkok.bo3tools.BO3Creator;
@@ -81,13 +84,11 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         }
 
         // Get and convert objects
+        sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converting BO2s, hang on...");
         CustomObjectCollection objects = OTG.getCustomObjectManager().getGlobalObjects();
         String worldName = (world != null && !globalObjects) ? world.getName() : null;
-        // NOTE: totemo: original code got objects from the world itself. That
-        // no longer exists in the OTG API.
-
-        sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Converting BO2s, hang on...");
-        int count = convertBO2s(BO3Tools.getAuthorName(sender), objects, worldName);
+        List<CustomObject> customObjectList = getCustomObjects(objects, worldName);
+        int count = convertBO2s(BO3Tools.getAuthorName(sender), customObjectList);
 
         // Messages
         sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Done! Converted " + count + " BO2s.");
@@ -105,20 +106,12 @@ public class BO2ConvertFolderCommand implements TabExecutor {
      * 
      * @param author The author that should be used for the objects.
      * @param objects The objects to convert.
-     * @param worldName The name of the world whose objects are converted, or
-     *        null to convert global objects.
      * @return The number of objects that were converted.
      */
-    protected int convertBO2s(String author, CustomObjectCollection objects, String worldName) {
+    protected int convertBO2s(String author, List<CustomObject> objects) {
         int count = 0;
 
-        // TODO: totemo: support iteration over CustomObjectCollection.
-        // CustomObjectCollection doesn't have any methods to permit iteration.
-        // I *could* hack something up with reflection.
-        // Since I have not pressing need for this command at the moment, I have
-        // left this unimplemented.
-        CustomObject[] allObjects = new CustomObject[0];
-        for (CustomObject object : allObjects) {
+        for (CustomObject object : objects) {
             if (object instanceof BO2) {
                 // Convert BO2
                 BO2 bo2 = (BO2) object;
@@ -136,6 +129,39 @@ public class BO2ConvertFolderCommand implements TabExecutor {
         }
 
         return count;
+    }
+
+    /**
+     * Return a collection of all CustomObjects pertaining to the specified
+     * world, or global objects if no world is specified.
+     *
+     * Since OTG class CustomObjectCollection doesn't have methods to support
+     * iteration, this method accesses its collection fields by reflection.
+     *
+     * @param collection The OTG CustomObjectCollection containing the objects.
+     * @param worldName The name of the world whose objects are converted, or
+     *        null to convert global objects.
+     * @return the collection of CustomObjects.
+     */
+    @SuppressWarnings("unchecked")
+    protected List<CustomObject> getCustomObjects(CustomObjectCollection collection, String worldName) {
+        try {
+            if (worldName == null) {
+                Field field = collection.getClass().getDeclaredField("objectsGlobalObjects");
+                field.setAccessible(true);
+                return (List<CustomObject>) field.get(collection);
+            } else {
+                Field field = collection.getClass().getDeclaredField("objectsPerWorld");
+                field.setAccessible(true);
+                HashMap<String, ArrayList<CustomObject>> objectsPerWorld = (HashMap<String, ArrayList<CustomObject>>) field.get(collection);
+                return objectsPerWorld.get(worldName);
+            }
+        } catch (Exception ex) {
+            OTG.log(LogMarker.ERROR, "Unable to reflectively access custom objects collection.");
+            OTG.printStackTrace(LogMarker.ERROR, ex);
+        }
+
+        return Collections.EMPTY_LIST;
     }
 
     @Override
