@@ -1,7 +1,5 @@
 package nl.rutgerkok.bo3tools;
 
-import nl.rutgerkok.bo3tools.util.BlockLocation;
-
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -12,7 +10,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.khorn.terraincontrol.bukkit.commands.BaseCommand;
+import com.pg85.otg.bukkit.commands.BaseCommand;
+
+import nl.rutgerkok.bo3tools.util.BlockLocation;
 
 public class BO3ClickHandler implements Listener {
     protected BO3Tools plugin;

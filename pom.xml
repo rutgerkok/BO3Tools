@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nl.rutgerkok.bo3tools</groupId>
 	<artifactId>BO3Tools</artifactId>
-	<version>1.6</version>
+	<version>1.7</version>
 	<name>BO3Tools</name>
 	<description>BO3s are objects used by TerrainControl. BO3Tools allows you to export your WorldEdit selection as a BO3 object. It can also convert a BO2 object to a BO3 object.</description>
 	<url>https://github.com/rutgerkok/BO3Tools</url>
@@ -17,13 +17,9 @@
 			<id>sk89q-repo</id>
 			<url>http://maven.sk89q.com/repo/</url>
 		</repository>
-		<repository>
-			<!-- For TerrainControl -->
-			<id>rutger-repo</id>
-			<url>http://www.rutgerkok.nl/repo</url>
-		</repository>
 	</repositories>
 	<build>
+		<defaultGoal>clean package</defaultGoal>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -55,19 +51,20 @@
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldedit</artifactId>
-			<version>5.5.8</version>
+			<version>6.0.0-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- OTG dependencies installed in local Maven repository. -->
+		<dependency>
+			<groupId>com.pg85.otg</groupId>
+			<artifactId>openterraingenerator-common</artifactId>
+			<version>1.12.2 - v6</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.khorn.terraincontrol</groupId>
-			<artifactId>terraincontrol-common</artifactId>
-			<version>2.8.4-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.khorn.terraincontrol</groupId>
-			<artifactId>terraincontrol-bukkit</artifactId>
-			<version>2.8.4-SNAPSHOT</version>
+			<groupId>com.pg85.otg</groupId>
+			<artifactId>openterraingenerator-bukkit</artifactId>
+			<version>1.12.2 - v6</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

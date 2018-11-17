@@ -8,29 +8,30 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import nl.rutgerkok.bo3tools.util.BlockLocation;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-import com.khorn.terraincontrol.LocalMaterialData;
-import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
-import com.khorn.terraincontrol.configuration.WorldConfig.ConfigMode;
-import com.khorn.terraincontrol.configuration.io.FileSettingsWriter;
-import com.khorn.terraincontrol.customobjects.CustomObject;
-import com.khorn.terraincontrol.customobjects.bo3.BO3;
-import com.khorn.terraincontrol.customobjects.bo3.BO3PlaceableFunction;
-import com.khorn.terraincontrol.customobjects.bo3.BlockCheck;
-import com.khorn.terraincontrol.customobjects.bo3.BlockFunction;
-import com.khorn.terraincontrol.util.MaterialSet;
-import com.khorn.terraincontrol.util.MaterialSetEntry;
-import com.khorn.terraincontrol.util.NamedBinaryTag;
-import com.khorn.terraincontrol.util.minecraftTypes.DefaultMaterial;
+import com.pg85.otg.LocalMaterialData;
+import com.pg85.otg.LocalWorld;
+import com.pg85.otg.OTG;
+import com.pg85.otg.configuration.CustomObjectConfigFunction;
+import com.pg85.otg.configuration.WorldConfig.ConfigMode;
+import com.pg85.otg.configuration.io.FileSettingsWriterOTGPlus;
+import com.pg85.otg.configuration.io.SettingsWriterOTGPlus;
+import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.customobjects.bo3.BO3;
+import com.pg85.otg.customobjects.bo3.BlockCheck;
+import com.pg85.otg.customobjects.bo3.BlockFunction;
+import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.MaterialSetEntry;
+import com.pg85.otg.util.NamedBinaryTag;
+import com.pg85.otg.util.minecraftTypes.DefaultMaterial;
 import com.sk89q.worldedit.bukkit.selections.Selection;
+
+import nl.rutgerkok.bo3tools.util.BlockLocation;
 
 /**
  * Creates a BO3 with the given parameters. Doesn't check the BO3 size. so be
@@ -38,12 +39,25 @@ import com.sk89q.worldedit.bukkit.selections.Selection;
  *
  */
 public class BO3Creator {
+    /**
+     * Save a BO3.
+     *
+     * @param bo3 the BO3.
+     */
+    public static void saveBO3(BO3 bo3) {
+        try {
+            SettingsWriterOTGPlus writer = new FileSettingsWriterOTGPlus(bo3.getSettings().getFile());
+            bo3.getSettings().write(writer, ConfigMode.WriteAll);
+        } catch (IOException ex) {
+            OTG.log(LogMarker.ERROR, "Failed to write to file {}", bo3.getSettings().getFile());
+            OTG.printStackTrace(LogMarker.ERROR, ex);
+        }
+    }
 
     /**
      * Creates a new BO3 creator.
      *
-     * @param name
-     *            Name of the BO3.
+     * @param name Name of the BO3.
      * @return The BO3Creator, for easy linking.
      */
     public static BO3Creator name(String name) {
@@ -51,7 +65,7 @@ public class BO3Creator {
         return new BO3Creator(name);
     }
 
-    private String name;
+    private final String name;
     private BlockLocation center;
     private Selection selection;
     private boolean includeAir;
@@ -69,8 +83,7 @@ public class BO3Creator {
     /**
      * Sets the author.
      *
-     * @param player
-     *            The author.
+     * @param player The author.
      * @return The BO3Creator, for easy linking.
      */
     public BO3Creator author(Player player) {
@@ -81,8 +94,7 @@ public class BO3Creator {
     /**
      * Sets the block checks to include.
      *
-     * @param locations
-     *            The locations. Can be immutable.
+     * @param locations The locations. Can be immutable.
      * @return The BO3Creator, for easy linking.
      */
     public BO3Creator blockChecks(Set<BlockLocation> locations) {
@@ -94,8 +106,7 @@ public class BO3Creator {
     /**
      * Sets the center.
      *
-     * @param location
-     *            The location of the center.
+     * @param location The location of the center.
      * @return The BO3Creator, for easy linking.
      */
     public BO3Creator center(BlockLocation location) {
@@ -114,14 +125,14 @@ public class BO3Creator {
         Validate.notNull(center, "No center given");
 
         // Create the BO3 file
-        File bo3File = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), name + ".bo3");
+        File bo3File = new File(OTG.getEngine().getGlobalObjectsDirectory(), name + ".bo3");
 
         BO3 bo3 = new BO3(this.name, bo3File);
         bo3.onEnable(Collections.<String, CustomObject> emptyMap());
 
         // Add the blocks to the BO3
-        List<BO3PlaceableFunction> blocks = createBlocks();
-        bo3.getSettings().blocks[0] = blocks.toArray(new BO3PlaceableFunction[blocks.size()]);
+        List<BlockFunction> blocks = createBlocks();
+        bo3.getSettings().blocks[0] = blocks.toArray(new BlockFunction[blocks.size()]);
 
         // Add the block checks to the BO3
         List<BlockCheck> blockChecks = createBlockChecks();
@@ -139,9 +150,7 @@ public class BO3Creator {
         // Don't save it every TC startup
         bo3.getSettings().settingsMode = ConfigMode.WriteDisable;
 
-        // Save the BO3
-        FileSettingsWriter.writeToFile(bo3.getSettings().getSettingsAsMap(), bo3.getFile(), ConfigMode.WriteAll);
-
+        saveBO3(bo3);
         return bo3;
     }
 
@@ -151,8 +160,12 @@ public class BO3Creator {
             List<BlockCheck> tcBlockChecks = new ArrayList<BlockCheck>(blockChecks.size());
             for (BlockLocation location : blockChecks) {
                 Block block = world.getBlockAt(location.getX(), location.getY(), location.getZ());
-                BlockCheck blockCheck = new BlockCheck(null, new MaterialSet(), location.getX() - center.getX(),
-                        location.getY() - center.getY(), location.getZ() - center.getZ());
+
+                BlockCheck blockCheck = (BlockCheck) CustomObjectConfigFunction.create(null, BlockCheck.class);
+                blockCheck.x = location.getX() - center.getX();
+                blockCheck.y = location.getY() - center.getY();
+                blockCheck.z = location.getZ() - center.getZ();
+
                 LocalMaterialData material = getMaterial(block);
                 if (material.rotate().equals(material)) {
                     // Data isn't used for rotation, so it's used for subdata
@@ -171,8 +184,8 @@ public class BO3Creator {
         }
     }
 
-    private List<BO3PlaceableFunction> createBlocks() {
-        File tileEntitiesFolder = new File(TerrainControl.getEngine().getGlobalObjectsDirectory(), name);
+    private List<BlockFunction> createBlocks() {
+        File tileEntitiesFolder = new File(OTG.getEngine().getGlobalObjectsDirectory(), name);
         if (includeTileEntities) {
             tileEntitiesFolder.mkdirs();
         }
@@ -183,17 +196,19 @@ public class BO3Creator {
         Location start = selection.getMinimumPoint();
         Location end = selection.getMaximumPoint();
 
-        List<BO3PlaceableFunction> blocks = new ArrayList<BO3PlaceableFunction>(
-                selection.getWidth() * selection.getHeight() * selection.getLength());
+        List<BlockFunction> blocks = new ArrayList<BlockFunction>(
+            selection.getWidth() * selection.getHeight() * selection.getLength());
         for (int x = start.getBlockX(); x <= end.getBlockX(); x++) {
             for (int y = start.getBlockY(); y <= end.getBlockY(); y++) {
                 for (int z = start.getBlockZ(); z <= end.getBlockZ(); z++) {
                     Block block = world.getBlockAt(x, y, z);
                     LocalMaterialData material = getMaterial(block);
                     if (includeAir || !material.isMaterial(DefaultMaterial.AIR)) {
-                        BlockFunction blockFunction = new BlockFunction(null,
-                                x - center.getX(), y - center.getY(), z - center.getZ(),
-                                filterMaterail(material));
+                        BlockFunction blockFunction = (BlockFunction) CustomObjectConfigFunction.create(null, BlockFunction.class,
+                                                                                                        x - center.getX(),
+                                                                                                        y - center.getY(),
+                                                                                                        z - center.getZ(),
+                                                                                                        material);
 
                         if (includeTileEntities) {
                             // Look for tile entities
@@ -239,7 +254,7 @@ public class BO3Creator {
     }
 
     private LocalMaterialData getMaterial(Block block) {
-        return TerrainControl.toLocalMaterialData(DefaultMaterial.getMaterial(block.getType().toString()), block.getData());
+        return OTG.toLocalMaterialData(DefaultMaterial.getMaterial(block.getType().toString()), block.getData());
     }
 
     private String getTileEntityName(NamedBinaryTag tag) {
@@ -265,8 +280,7 @@ public class BO3Creator {
     /**
      * Activates tile entities.
      *
-     * @param world
-     *            The LocalWorld object, which is needed for tile entities.
+     * @param world The LocalWorld object, which is needed for tile entities.
      * @return The BO3Creator, for easy linking.
      */
     public BO3Creator includeTileEntities(LocalWorld world) {
@@ -284,8 +298,7 @@ public class BO3Creator {
     /**
      * Sets the bounds.
      *
-     * @param selection
-     *            The bounds.
+     * @param selection The bounds.
      * @return The BO3Creator, for easy linking.
      */
     public BO3Creator selection(Selection selection) {
